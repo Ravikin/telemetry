@@ -1,0 +1,1 @@
+dzia³j¹cy pomiar dla 4 temometrów i wyœwietlacz
