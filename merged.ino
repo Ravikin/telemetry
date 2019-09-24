@@ -111,7 +111,6 @@ void loop(){
 	if (b_x)
 	{
 		lcd.print("  :"); lcd.print(T1);
-		b_x = !b_x;
 	} else
 	{
 		lcd.print("LP:"); lcd.print(T1);
@@ -120,15 +119,42 @@ void loop(){
   {
 	lcd.print("LP:"); lcd.print(T1);
   }
-  lcd.setCursor(9,0);
-  lcd.print("PP:"); lcd.print(T3);
-  lcd.setCursor(0,1);
-  lcd.print("LT:"); lcd.print(LT);
-  lcd.setCursor(9,1);
-  lcd.print("PT:"); lcd.print(PT);
 
+  lcd.setCursor(9,0);
+  if (PP >= 90) {
+	if (b_x) {
+		lcd.print("  :"); lcd.print(T3);
+	} else {
+		lcd.print("PP:"); lcd.print(T3);
+	}
+  } else {
+	lcd.print("PP:"); lcd.print(T3);
+  }
+  
+  lcd.setCursor(0,1);
+  if (LT >= 90) {
+	if (b_x) {
+		lcd.print("  :"); lcd.print(LT);
+	} else {
+		lcd.print("LT:"); lcd.print(LT);
+	}
+  } else {
+	lcd.print("LT:"); lcd.print(LT);
+  }
+
+  lcd.setCursor(9,1);
+  if (PT >= 90) {
+	if (b_x) {
+		lcd.print("  :"); lcd.print(PT);
+	} else {
+		lcd.print("PT:"); lcd.print(PT);
+	}
+  } else {
+	lcd.print("PT:"); lcd.print(PT);
+  }
 
   
+  b_x = !b_x;
   delay(10);
   
 }
