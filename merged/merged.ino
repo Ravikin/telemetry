@@ -17,8 +17,8 @@ Adafruit_MLX90614 mlx2 = Adafruit_MLX90614(0x71);
 Adafruit_MLX90614 mlx3 = Adafruit_MLX90614(0x72);
 Adafruit_MLX90614 mlx4 = Adafruit_MLX90614(0x73);
 
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2)
-bool b_x = True;
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+bool b_x = true;
 
 KalmanFilter kalmanX(0.001, 0.003, 0.03);
 KalmanFilter kalmanY(0.001, 0.003, 0.03);
@@ -64,9 +64,9 @@ void loop(){
   kalRoll = kalmanX.update(accRoll, gyr.XAxis);
 
 // zbieramy temperaturki
-  double T1 = mlx1.readObjectTempC();
+  double PP = mlx1.readObjectTempC();
   double LT = mlx2.readObjectTempC();
-  double T3 = mlx3.readObjectTempC();
+  double LP = mlx3.readObjectTempC();
   double PT = mlx4.readObjectTempC();
 
 // kierunek z magnetometru
@@ -104,11 +104,11 @@ void loop(){
   Serial.print(";");
   Serial.print(kalRoll);
   Serial.print(";");
-  Serial.print(T1);
+  Serial.print(LP);
   Serial.print(";");
   Serial.print(LT);
   Serial.print(";");
-  Serial.print(T3);
+  Serial.print(PP);
   Serial.print(";");
   Serial.print(PT);
   Serial.print(";");
@@ -121,47 +121,29 @@ void loop(){
   lcd.setCursor(0,0);
   if (LP >= 90)
   {
-	if (b_x)
-	{
-		lcd.print("  :"); lcd.print(T1);
-	} else
-	{
-		lcd.print("LP:"); lcd.print(T1);
-	}
+		lcd.print("!!:"); lcd.print(LP);
   } else
   {
-	lcd.print("LP:"); lcd.print(T1);
+	lcd.print("LP:"); lcd.print(LP);
   }
 
   lcd.setCursor(9,0);
   if (PP >= 90) {
-	if (b_x) {
-		lcd.print("  :"); lcd.print(T3);
-	} else {
-		lcd.print("PP:"); lcd.print(T3);
-	}
+	  lcd.print("!!:"); lcd.print(PP);
   } else {
-	lcd.print("PP:"); lcd.print(T3);
+	  lcd.print("PP:"); lcd.print(PP);
   }
   
   lcd.setCursor(0,1);
   if (LT >= 90) {
-	if (b_x) {
-		lcd.print("  :"); lcd.print(LT);
-	} else {
-		lcd.print("LT:"); lcd.print(LT);
-	}
+	    lcd.print("!!:"); lcd.print(LT);
   } else {
 	lcd.print("LT:"); lcd.print(LT);
   }
 
   lcd.setCursor(9,1);
   if (PT >= 90) {
-	if (b_x) {
-		lcd.print("  :"); lcd.print(PT);
-	} else {
-		lcd.print("PT:"); lcd.print(PT);
-	}
+	    lcd.print("!!:"); lcd.print(PT);
   } else {
 	lcd.print("PT:"); lcd.print(PT);
   }
