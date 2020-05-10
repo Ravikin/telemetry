@@ -7,7 +7,13 @@
 #include <KalmanFilter.h>
 #include <MechaQMC5883.h>
 #include <LiquidCrystal.h>
+#include <Adafruit_GPS.h>
+#include <SoftwareSerial.h>
 
+// Connect the GPS Power pin to 5V
+// Connect the GPS Ground pin to ground
+// Connect the GPS TX (transmit) pin to Digital 8
+// Connect the GPS RX (receive) pin to Digital 7
 
 // inicjalizacja zmiennych
 MPU6050 mpu;
@@ -16,6 +22,8 @@ Adafruit_MLX90614 mlx1 = Adafruit_MLX90614(0x70);
 Adafruit_MLX90614 mlx2 = Adafruit_MLX90614(0x71);
 Adafruit_MLX90614 mlx3 = Adafruit_MLX90614(0x72);
 Adafruit_MLX90614 mlx4 = Adafruit_MLX90614(0x73);
+SoftwareSerial mySerial(8, 7);
+Adafruit_GPS GPS(&mySerial);
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 bool b_x = true;
@@ -24,11 +32,15 @@ KalmanFilter kalmanX(0.001, 0.003, 0.03);
 KalmanFilter kalmanY(0.001, 0.003, 0.03);
 
 int previousDegree;
+uint32_t timer = millis();
+
 
 float accPitch = 0;
 float accRoll = 0;
 float kalPitch = 0;
 float kalRoll = 0;
+
+#define GPSECHO false  
 
 // setup boarda razem z bledem nt. gyro
 // to trzeba bedzie poprawic xd @TODO
@@ -47,6 +59,12 @@ void setup(){
   mlx3.begin();
   mlx4.begin();
   qmc.init();
+  GPS.begin(9600);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
+
+
+
 
   lcd.begin(16,2);
 }
@@ -94,8 +112,38 @@ void loop(){
  
   // Zamiana radianow na stopnie
   float headingDegrees = heading * 180/M_PI;
+
+  // GPS STUFF
+  if (GPS.newNMEAreceived()) {
+      if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
+      return;  // we can fail to parse a sentence in which case we should just wait for another
+  }
+
   
 // wypisujemy dane na serial (cos po kablu)
+  Serial.print(GPS.day, DEC); Serial.print('/');
+  Serial.print(GPS.month, DEC); Serial.print("/20");
+  Serial.print(GPS.year, DEC);
+  Serial.print(";");
+  if (GPS.hour < 10) { Serial.print('0'); }
+  Serial.print(GPS.hour, DEC); Serial.print(':');
+  if (GPS.minute < 10) { Serial.print('0'); }
+  Serial.print(GPS.minute, DEC); Serial.print(':');
+  if (GPS.seconds < 10) { Serial.print('0'); }
+  Serial.print(GPS.seconds, DEC); Serial.print('.');
+  if (GPS.milliseconds < 10) {
+    Serial.print("00");
+  } else if (GPS.milliseconds > 9 && GPS.milliseconds < 100) {
+    Serial.print("0");
+  }
+  Serial.print(GPS.milliseconds);
+  Serial.print(";");
+  if (GPS.fix) {
+    Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
+    Serial.print(";");
+    Serial.print(GPS.longitude, 4); Serial.print(GPS.lon);
+    Serial.print(";");
+    Serial.print((GPS.speed)*1.8);
   Serial.print(accPitch);
   Serial.print(";");
   Serial.print(accRoll);
