@@ -18,16 +18,6 @@ void setup() {
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY); //Request RMC only
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ); //Set update rate to 10 hz
   delay(1000); 
-  
-  pinMode(10, OUTPUT); //Must declare 10 an output and reserve it to keep SD card happy
-  SD.begin(chipSelect); //Initialize the SD card reader
-  
-  if (SD.exists("NMEA.txt")) { //Delete old data files to start fresh
-    SD.remove("NMEA.txt");
-  }
-  if (SD.exists("GPSData.txt")) { //Delete old data files to start fresh
-    SD.remove("GPSData.txt");
-  }
 
 }
 
@@ -36,13 +26,6 @@ void loop() {
   readGPS();
 
   if(GPS.fix==1) { //Only save data if we have a fix
-  mySensorData = SD.open("NMEA.txt", FILE_WRITE); //Open file on SD card for writing
-  mySensorData.println(NMEA1); //Write first NMEA to SD card
-  mySensorData.println(NMEA2); //Write Second NMEA to SD card
-  mySensorData.close();  //Close the file
-  
- 
-  mySensorData = SD.open("GPSData.txt", FILE_WRITE);
   
   degWhole=float(int(GPS.longitude/100)); //gives me the whole degree part of Longitude
   degDec = (GPS.longitude - degWhole*100)/60; //give me fractional part of longitude
@@ -50,8 +33,8 @@ void loop() {
   if (GPS.lon=='W') {  //If you are in Western Hemisphere, longitude degrees should be negative
     deg= (-1)*deg;
   }
-  mySensorData.print(deg,4); //writing decimal degree longitude value to SD card
-  mySensorData.print(","); //write comma to SD card
+  Serial.print(deg,4); //writing decimal degree longitude value to SD card
+  Serial.print(","); //write comma to SD card
   
   degWhole=float(int(GPS.latitude/100)); //gives me the whole degree part of latitude
   degDec = (GPS.latitude - degWhole*100)/60; //give me fractional part of latitude
@@ -59,13 +42,15 @@ void loop() {
   if (GPS.lat=='S') {  //If you are in Southern hemisphere latitude should be negative
     deg= (-1)*deg;
   }
-  mySensorData.print(deg,4); //writing decimal degree longitude value to SD card
-  mySensorData.print(","); //write comma to SD card
+  Serial.print(deg,4); //writing decimal degree longitude value to SD card
+  Serial.print(","); //write comma to SD card
   
-  mySensorData.print(GPS.altitude); //write altitude to file
-  mySensorData.print(" ");  //format with one white space to delimit data sets
+  Serial.print(GPS.altitude); //write altitude to file
+  Serial.print(","); 
+  
+  Serial.print((GPS.speed)*1.8); // write speed in kmh (miles *1.8)
+  Serial.print(" ");  //format with one white space to delimit data sets
 
-  mySensorData.close();
   }
   
 }
