@@ -7,8 +7,8 @@
 #include <KalmanFilter.h>
 #include <MechaQMC5883.h>
 #include <LiquidCrystal.h>
-#include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
+#include <Adafruit_GPS.h>
 
 // Connect the GPS Power pin to 5V
 // Connect the GPS Ground pin to ground
@@ -32,21 +32,20 @@ KalmanFilter kalmanX(0.001, 0.003, 0.03);
 KalmanFilter kalmanY(0.001, 0.003, 0.03);
 
 int previousDegree;
-uint32_t timer = millis();
-
 
 float accPitch = 0;
 float accRoll = 0;
 float kalPitch = 0;
 float kalRoll = 0;
 
-#define GPSECHO false  
+#define GPSECHO true  
 
 // setup boarda razem z bledem nt. gyro
 // to trzeba bedzie poprawic xd @TODO
 // tak zeby mowilo ze jest problem ale sie odpalilo...no albo zeby chociaz mowilo o problemie
 void setup(){
   Serial.begin(115200);
+  delay(5000);
   Serial.println("Setup");
   while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G)){
     Serial.println("no mpu");
@@ -59,15 +58,19 @@ void setup(){
   mlx3.begin();
   mlx4.begin();
   qmc.init();
+  
   GPS.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);
 
+  delay(1000);
+  mySerial.println(PMTK_Q_RELEASE);
 
 
 
   lcd.begin(16,2);
 }
+uint32_t timer = millis();
 
 // i lecimy z koksem
 void loop(){
@@ -114,8 +117,13 @@ void loop(){
   float headingDegrees = heading * 180/M_PI;
 
   // GPS STUFF
+    char c = GPS.read();
+  // if you want to debug, this is a good time to do it!
+  if ((c) && (GPSECHO))
+    Serial.write(c);
+
   if (GPS.newNMEAreceived()) {
-      if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
+    if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
       return;  // we can fail to parse a sentence in which case we should just wait for another
   }
 
@@ -144,6 +152,7 @@ void loop(){
     Serial.print(GPS.longitude, 4); Serial.print(GPS.lon);
     Serial.print(";");
     Serial.print((GPS.speed)*1.8);
+  }
   Serial.print(accPitch);
   Serial.print(";");
   Serial.print(accRoll);
@@ -201,6 +210,6 @@ void loop(){
 // @TODO? na pewno lepsiejszy wyswietlacz <3
   b_x = !b_x;
   // ewentualnie delaya mozna wywalic - to po to zeby.....w sumie nie pamietam. chyba po to zeby malinka dawala rade wszystko zapisywac? na pewno jak jest za duzy delay to ktorys z elementow szalal :/ 
-  delay(10);
+  delay(500);
   
 }
